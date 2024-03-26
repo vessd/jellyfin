@@ -1348,7 +1348,7 @@ namespace MediaBrowser.Controller.MediaEncoding
                 bitrate = Math.Max(bitrate, 1000);
             }
 
-            // Currently use the same buffer size for all encoders
+            // Default buffer size
             int bufsize = bitrate * 2;
 
             if (string.Equals(videoCodec, "libvpx", StringComparison.OrdinalIgnoreCase)
@@ -1392,6 +1392,12 @@ namespace MediaBrowser.Controller.MediaEncoding
                 if (_mediaEncoder.IsVaapiDeviceInteli965)
                 {
                     return FormattableString.Invariant($" -rc_mode CBR -b:v {bitrate} -maxrate {bitrate} -bufsize {bufsize}");
+                }
+
+                // Fixes pixelated output when the content of the picture changes drastically.
+                if (_mediaEncoder.IsVaapiDeviceAmd)
+                {
+                    bufsize = bitrate * 3;
                 }
 
                 return FormattableString.Invariant($" -rc_mode VBR -b:v {bitrate} -maxrate {bitrate} -bufsize {bufsize}");
